@@ -155,5 +155,34 @@ class Adjective:
                 stem += "でした"
             return stem
 
+class Noun:
+    def __init__(self, dictionary, positive=True, present=True):
+        self.dictionary = dictionary
+        self.positive = positive
+        self.present = present
+    def plain(self):
+        if self.positive:
+            stem = self.dictionary + "だ"
+            if not self.present:
+                stem += "った"
+        else:
+            stem = self.dictionary + "では"
+            if self.present:
+                stem += "ない"
+            else:
+                stem += "なかった"
+        return stem
+    def polite(self):
+        stem = self.dictionary + "で"
+        if self.positive:
+            if self.present:
+                stem += "す"
+            else:
+                stem += "した"
+        else:
+            stem += "はありません"
+            if not self.present:
+                stem += "でした"
+        return stem
 
-print(Adjective("いろいろ", present=False).polite())
+print(Noun("図書館").polite())
