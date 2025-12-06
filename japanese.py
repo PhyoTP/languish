@@ -1,23 +1,26 @@
 class Verb:
-    def __init__(self, dictionary, group=2):
+    def __init__(self, dictionary, group=2, positive=True, present=True):
         self.dictionary = dictionary
         if dictionary == "する" or dictionary == "来る":
             self.group = 3
         else:
             self.group = group
+        self.positive = positive
+        self.present = present
 
-    def polite(self, negative=False, past=False):
+
+    def polite(self):
         possible = {
-            (False, False): "ます",
-            (False, True): "ました",
-            (True, False): "ません",
-            (True, True): "ませんでした"
+            (True, True): "ます",
+            (True, False): "ました",
+            (False, True): "ません",
+            (False, False): "ませんでした"
         }
-        return self.stem() + possible[(negative,past)]
+        return self.stem() + possible[(self.positive,self.present)]
 
 
-    def plain(self, negative=False, past=False):
-        if negative:
+    def plain(self):
+        if not self.positive:
             stem = ""
             match self.group:
                 case 1:
@@ -37,11 +40,11 @@ class Verb:
                     stem = self.dictionary[:-1]
                 case 3:
                     stem = self.stem()
-            if past:
+            if not self.present:
                 return stem + "なかった"
             return stem + "ない"
         else:
-            if past:
+            if not self.present:
                 return self.ta_form()
             return self.dictionary
 
@@ -103,5 +106,54 @@ class Verb:
         elif self.te_form()[-1] == "で":
             return self.te_form()[:-1] + "だ"
         return self.dictionary[:-1] + "た"
+class Adjective:
+    def __init__(self, dictionary, adj_type="na", positive=True, present=True):
+        self.dictionary = dictionary
+        self.adj_type = adj_type
+        self.positive = positive
+        self.present = present
+    def plain(self):
+        if self.positive:
+            possible = {
+                # i, present
+                (True, True): self.dictionary,
+                (True, False): self.dictionary[:-1] + "かった",
+                (False, True): self.dictionary + "だ",
+                (False, False): self.dictionary + "だった"
+            }
+            return possible[self.adj_type == "i", self.present]
+        else:
+            stem = ""
+            if self.adj_type == "i":
+                stem += self.dictionary[:-1] + "く"
+            else:
+                stem += self.dictionary + "では"
+            if self.present:
+                stem += "ない"
+            else:
+                stem += "なかった"
+            return stem
 
-print(Verb("起きる", 2).plain(True))
+
+    def polite(self):
+        if self.positive:
+            if self.present:
+                return self.dictionary + "です"
+            else:
+                if self.adj_type == "i":
+                    return self.dictionary[:-1] + "かったです"
+                else:
+                    return self.dictionary + "でした"
+        else:
+            stem = ""
+            if self.adj_type == "i":
+                stem += self.dictionary[:-1] + "く"
+            else:
+                stem += self.dictionary + "では"
+            stem += "ありません"
+            if not self.present:
+                stem += "でした"
+            return stem
+
+
+print(Adjective("いろいろ", present=False).polite())
